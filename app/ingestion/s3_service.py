@@ -13,8 +13,7 @@ class S3Service:
     def list_pdf_files(self):
 
         response = self.client.list_objects_v2(
-            Bucket=self.bucket,
-            Prefix=settings.S3_PREFIX
+            Bucket=self.bucket
         )
 
         pdf_files = []
@@ -42,3 +41,18 @@ class S3Service:
         )
 
         return str(local_path)
+
+
+
+if __name__ == "__main__":
+
+    service = S3Service()
+
+    print("Bucket:", service.bucket)
+
+    pdf_files = service.list_pdf_files()
+
+    print(f"Total PDF Files: {len(pdf_files)}")
+
+    for pdf in pdf_files:
+        print(pdf)
