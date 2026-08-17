@@ -1,0 +1,141 @@
+# ============================================================
+# Python 3.11 - Enterprise RAG Application
+# ============================================================
+
+# -----------------------------
+# FastAPI / Web Server
+# -----------------------------
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+python-multipart==0.0.20
+
+# -----------------------------
+# Configuration / Environment
+# -----------------------------
+pydantic==2.11.7
+pydantic-settings==2.10.1
+python-dotenv==1.1.1
+
+# -----------------------------
+# Authentication / Security
+# -----------------------------
+python-jose[cryptography]==3.5.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.3.0
+
+# -----------------------------
+# PostgreSQL
+# -----------------------------
+SQLAlchemy==2.0.43
+psycopg[binary]==3.2.9
+alembic==1.16.4
+
+# -----------------------------
+# Redis
+# -----------------------------
+redis==6.4.0
+
+# -----------------------------
+# AWS
+# -----------------------------
+boto3==1.40.10
+botocore==1.40.10
+
+# -----------------------------
+# PDF Processing
+# -----------------------------
+PyMuPDF==1.26.3
+
+# -----------------------------
+# LangChain
+# -----------------------------
+langchain==0.3.27
+langchain-core==0.3.74
+langchain-community==0.3.27
+langchain-text-splitters==0.3.9
+
+# -----------------------------
+# Groq LLM
+# -----------------------------
+groq==0.31.0
+langchain-groq==0.3.7
+
+# -----------------------------
+# Embeddings
+# Sentence Transformers
+# -----------------------------
+sentence-transformers==5.1.0
+transformers==4.55.2
+torch==2.8.0
+
+# -----------------------------
+# Vector Database
+# Pinecone
+# -----------------------------
+pinecone==7.3.0
+langchain-pinecone==0.2.12
+
+# -----------------------------
+# BM25 / Hybrid Search
+# -----------------------------
+rank-bm25==0.2.2
+numpy==2.3.2
+
+# -----------------------------
+# Cohere Reranker
+# -----------------------------
+cohere==5.17.0
+langchain-cohere==0.4.4
+
+# -----------------------------
+# NeMo Guardrails
+# -----------------------------
+nemoguardrails==0.23.0
+
+# -----------------------------
+# RAGAS Evaluation
+# -----------------------------
+ragas==0.3.2
+
+# -----------------------------
+# Monitoring
+# -----------------------------
+prometheus-client==0.22.1
+opentelemetry-api==1.36.0
+opentelemetry-sdk==1.36.0
+opentelemetry-instrumentation-fastapi==0.57b0
+opentelemetry-instrumentation-sqlalchemy==0.57b0
+
+# -----------------------------
+# HTTP Client
+# -----------------------------
+httpx==0.28.1
+
+# -----------------------------
+# Logging
+# -----------------------------
+structlog==25.4.0
+
+# -----------------------------
+# Testing
+# -----------------------------
+pytest==8.4.1
+pytest-asyncio==1.1.0
+pytest-cov==6.2.1
+
+# -----------------------------
+# Code Quality
+# -----------------------------
+black==25.1.0
+ruff==0.12.8
+isort==6.0.1
+
+# -----------------------------
+# Type Checking
+# -----------------------------
+mypy==1.17.1
+
+# -----------------------------
+# JWT / Password / Security
+# -----------------------------
+email-validator==2.2.0
