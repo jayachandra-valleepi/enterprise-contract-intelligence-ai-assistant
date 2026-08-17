@@ -1,34 +1,19 @@
-
-from passlib.context import CryptContext
-
-
-# ============================================================
-# PASSWORD HASHING CONFIGURATION
-# ============================================================
-
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto",
-)
+from pwdlib import PasswordHash
 
 
-# ============================================================
-# HASH PASSWORD
-# ============================================================
+# Argon2-based password hashing.
+password_hash = PasswordHash.recommended()
+
 
 def hash_password(password: str) -> str:
     """
-    Convert a plain-text password into a secure password hash.
+    Hash a plain-text password.
 
-    The plain-text password should never be stored in the database.
+    The returned value should be stored in the database
+    instead of the original password.
     """
 
-    return pwd_context.hash(password)
-
-
-# ============================================================
-# VERIFY PASSWORD
-# ============================================================
+    return password_hash.hash(password)
 
 def verify_password(
     plain_password: str,
@@ -38,7 +23,7 @@ def verify_password(
     Verify a plain-text password against a stored hash.
     """
 
-    return pwd_context.verify(
+    return password_hash.verify(
         plain_password,
         hashed_password,
     )

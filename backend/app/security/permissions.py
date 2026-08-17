@@ -1,61 +1,30 @@
+from enum import Enum
 
-# APPLICATION ROLES
-
-ROLE_ADMIN = "admin"
-ROLE_MANAGER = "manager"
-ROLE_USER = "user"
-
-
-# ============================================================
-# PERMISSIONS
-# ============================================================
-
-UPLOAD_DOCUMENT = "upload_document"
-VIEW_DOCUMENT = "view_document"
-DELETE_DOCUMENT = "delete_document"
-
-MANAGE_USERS = "manage_users"
-VIEW_AUDIT_LOGS = "view_audit_logs"
-
-
-# ============================================================
-# ROLE → PERMISSIONS
-# ============================================================
-
-ROLE_PERMISSIONS: dict[str, set[str]] = {
-    ROLE_ADMIN: {
-        UPLOAD_DOCUMENT,
-        VIEW_DOCUMENT,
-        DELETE_DOCUMENT,
-        MANAGE_USERS,
-        VIEW_AUDIT_LOGS,
-    },
-
-    ROLE_MANAGER: {
-        UPLOAD_DOCUMENT,
-        VIEW_DOCUMENT,
-        DELETE_DOCUMENT,
-    },
-
-    ROLE_USER: {
-        UPLOAD_DOCUMENT,
-        VIEW_DOCUMENT,
-    },
-}
-
-
-# ============================================================
-# CHECK PERMISSION
-# ============================================================
-
-def has_permission(
-    role: str,
-    permission: str,
-) -> bool:
+class Permission(str, Enum):
     """
-    Check whether a role has a specific permission.
-    """
+    Application permissions used by the RBAC system.
+    
+    These values must match the permission_name values
+    in the existing PostgreSQL permissions table."""
 
-    permissions = ROLE_PERMISSIONS.get(role, set())
 
-    return permission in permissions
+    
+    LOGIN = "LOGIN"
+
+    ASK_QUESTION = "ASK_QUESTION"
+
+    VIEW_DOCUMENT = "VIEW_DOCUMENT"
+
+    UPLOAD_DOCUMENT = "UPLOAD_DOCUMENT"
+
+    DELETE_DOCUMENT = "DELETE_DOCUMENT"
+
+    VIEW_CHAT_HISTORY = "VIEW_CHAT_HISTORY"
+
+    DELETE_CHAT_HISTORY = "DELETE_CHAT_HISTORY"
+
+    VIEW_AUDIT_LOG = "VIEW_AUDIT_LOG"
+
+    MANAGE_USERS = "MANAGE_USERS"
+
+    MANAGE_PERMISSIONS = "MANAGE_PERMISSIONS"

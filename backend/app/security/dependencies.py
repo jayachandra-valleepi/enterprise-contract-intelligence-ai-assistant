@@ -1,85 +1,83 @@
-# backend/app/security/dependencies.py
-
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from app.database.connection import get_db
-from app.database.models import User
-from app.database.repositories import get_user_by_id
-from app.security.jwt import decode_token
+from backend.app.database.connection import get_db
+from backend.app.database.models import User
+from backend.app.database.repositories.user_repository import UserRepository
+from backend.app.security.jwt import decode_access_token
 
-
-# ============================================================
-# OAUTH2 CONFIGURATION
-# ============================================================
 
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/api/v1/auth/login",
+    tokenUrl="/api/v1/auth/login"
 )
-
-
-# ============================================================
-# CURRENT USER
-# ============================================================
 
 def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[Session, Depends(get_db)],
 ) -> User:
+    """
+    Authenticate the current user.
 
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials.",
-        headers={
-            "WWW-Authenticate": "Bearer",
-        },
-    )
+    Steps:
 
-    payload = decode_token(token)
+    1. Extract JWT from Authorization header.
+    2. Decode JWT.
+    3. Get user_id from token.
+    4. Query existing users table.
+    5. Verify user is active.
+    """
 
-    if payload is None:
-        raise credentials_exception
+    try:
+        payload = decode_access_token(token)
 
-    # Make sure this is an access token.
-    if payload.get("type") != "access":
-        raise credentials_exception
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(exc),
+            headers={
+                "WWW-Authenticate": "Bearer"
+            },
+        ) from exc
 
     user_id = payload.get("sub")
 
     if user_id is None:
-        raise credentials_exception
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication token.",
+            headers={
+                "WWW-Authenticate": "Bearer"
+            },
+        )
 
     try:
         user_id = int(user_id)
 
-    except (TypeError, ValueError):
-        raise credentials_exception
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user ID in token.",
+            headers={
+                "WWW-Authenticate": "Bearer"
+            },
+        ) from exc
 
-    user = get_user_by_id(
-        db=db,
-        user_id=user_id,
+    user_repository = UserRepository(db)
+
+    user = user_repository.get_active_user(
+        user_id
     )
 
     if user is None:
-        raise credentials_exception
-
-    if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is inactive.",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User does not exist or is inactive.",
+            headers={
+                "WWW-Authenticate": "Bearer"
+            },
         )
 
     return user
-
-
-# ============================================================
-# CURRENT ACTIVE USER TYPE
-# ============================================================
-
-CurrentUser = Annotated[
-    User,
-    Depends(get_current_user),
-]

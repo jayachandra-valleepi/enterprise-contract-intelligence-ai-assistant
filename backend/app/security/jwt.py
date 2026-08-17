@@ -1,5 +1,3 @@
-# backend/app/security/jwt.py
-
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -7,104 +5,66 @@ from jose import JWTError, jwt
 
 from backend.app.config.settings import settings
 
-
-# ============================================================
-# JWT CONFIGURATION
-# ============================================================
-
-SECRET_KEY = settings.jwt_secret_key
-ALGORITHM = settings.jwt_algorithm
-
-
-# ============================================================
-# CREATE ACCESS TOKEN
-# ============================================================
-
 def create_access_token(
-    data: dict[str, Any],
+        user_id:int,
+        email:str,
+        role:str,
 ) -> str:
+
     """
-    Create a JWT access token.
-
-    The input data is copied before adding JWT-specific fields.
+    Create a JWT access token for an authenticated user.
     """
 
-    payload = data.copy()
+    now = datetime.now(timezone.utc)
 
-    expire = datetime.now(timezone.utc) + timedelta(
+    expires_at = now + timedelta(
         minutes=settings.access_token_expire_minutes
     )
 
-    payload.update(
-        {
-            "exp": expire,
-            "type": "access",
-        }
-    )
+    payload: dict[str, Any] = {
+        "sub": str(user_id),
+        "email": email,
+        "role": role,
+        "iat": now,
+        "exp": expires_at,
+        "type": "access",
+    }
 
-    return jwt.encode(
+
+    token = jwt.encode(
         payload,
-        SECRET_KEY,
-        algorithm=ALGORITHM,
+        settings.jwt_secret_key,
+        algorithm=settings.jwt_algorithm,
     )
 
+    return token
 
-# ============================================================
-# CREATE REFRESH TOKEN
-# ============================================================
 
-def create_refresh_token(
-    data: dict[str, Any],
-) -> str:
+
+def decode_access_token(token: str) -> dict[str, Any]:
     """
-    Create a JWT refresh token.
+    Decode and validate a JWT access token.
 
-    Refresh tokens have a longer expiration period.
-    """
-
-    payload = data.copy()
-
-    expire = datetime.now(timezone.utc) + timedelta(
-        days=settings.refresh_token_expire_days
-    )
-
-    payload.update(
-        {
-            "exp": expire,
-            "type": "refresh",
-        }
-    )
-
-    return jwt.encode(
-        payload,
-        SECRET_KEY,
-        algorithm=ALGORITHM,
-    )
-
-
-# ============================================================
-# DECODE TOKEN
-# ============================================================
-
-def decode_token(
-    token: str,
-) -> dict[str, Any] | None:
-    """
-    Decode and validate a JWT.
-
-    Returns:
-        Token payload if valid.
-        None if invalid or expired.
+    Raises:
+        ValueError: If the token is invalid or expired.
     """
 
     try:
         payload = jwt.decode(
             token,
-            SECRET_KEY,
-            algorithms=[ALGORITHM],
+            settings.jwt_secret_key,
+            algorithms=[settings.jwt_algorithm],
         )
+
+        if payload.get("type") != "access":
+            raise ValueError("Invalid token type.")
+
+        if payload.get("sub") is None:
+            raise ValueError("Token does not contain user ID.")
 
         return payload
 
-    except JWTError:
-        return None
+    except JWTError as exc:
+        raise ValueError(
+            "Invalid or expired access token."
+        ) from exc

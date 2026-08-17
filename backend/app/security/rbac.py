@@ -1,52 +1,57 @@
-# backend/app/security/rbac.py
+from collections.abc import Callable
+from typing import Annotated
 
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
+from backend.app.database.connection import get_db
 from backend.app.database.models import User
-from backend.app.security.permissions import has_permission
+from backend.app.database.repositories.permission_repository  import(
+    PermissionRepository
+)
 
+from backend.app.security.dependencies import get_current_user
+from backend.app.security.permissions import Permission
 
-# ============================================================
-# REQUIRE ROLE
-# ============================================================
-
-def require_role(
-    user: User,
-    allowed_roles: set[str],
-) -> User:
-    """
-    Allow access only when the user's role is in allowed_roles.
-    """
-
-    if user.role not in allowed_roles:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to perform this action.",
-        )
-
-    return user
-
-
-# ============================================================
-# REQUIRE PERMISSION
-# ============================================================
 
 def require_permission(
-    user: User,
-    permission: str,
-) -> User:
-    """
-    Allow access only when the user's role
-    contains the requested permission.
-    """
+    required_permission: Permission,
+) -> Callable:
 
-    if not has_permission(
-        user.role,
-        permission,
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to perform this action.",
+    def permission_checker(
+        current_user: Annotated[
+            User,
+            Depends(get_current_user),
+        ],
+        db: Annotated[
+            Session,
+            Depends(get_db),
+        ],
+    ) -> User:
+        """
+        Verify that the current user's role has
+        the required permission.
+        """
+
+        permission_repository = PermissionRepository(db)
+
+        has_permission = (
+            permission_repository.has_permission(
+                role=current_user.role,
+                permission_name=required_permission.value,
+            )
         )
 
-    return user
+        if not has_permission:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    f"Permission denied. "
+                    f"Required permission: "
+                    f"{required_permission.value}"
+                ),
+            )
+
+        return current_user
+
+    return permission_checker
