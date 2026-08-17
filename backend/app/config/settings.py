@@ -133,12 +133,17 @@ class Settings(BaseSettings):
     )
 
     aws_region: str = Field(
-        default="ap-south-1",
+        default="us-east-1",
         validation_alias="AWS_REGION",
     )
 
     s3_bucket_name: str = Field(
         validation_alias="S3_BUCKET_NAME",
+    )
+
+    s3_prefix: str | None = Field(
+        default=None,
+        validation_alias="AWS_S3_PREFIX",
     )
 
     # ============================================================
@@ -192,6 +197,15 @@ class Settings(BaseSettings):
         default="contracts",
         validation_alias="PINECONE_NAMESPACE",
     )
+    pinecone_cloud: str = Field(
+            default="aws",
+            validation_alias="PINECONE_CLOUD",
+    )
+    pinecone_region: str = Field(
+                default="us-east-1",
+                validation_alias="PINECONE_REGION",
+        )
+    
 
     # ============================================================
     # COHERE RERANKER

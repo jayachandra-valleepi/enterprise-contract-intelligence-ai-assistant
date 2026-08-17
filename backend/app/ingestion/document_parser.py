@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from app.ingestion.pdf_loader import (
+from backend.app.ingestion.pdf_loader import (
     ExtractedDocument,
     PDFLoader,
 )

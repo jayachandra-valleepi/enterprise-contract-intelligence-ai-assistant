@@ -74,7 +74,7 @@ class IngestionPipeline:
         )
 
         with tempfile.TemporaryDirectory(
-            prefix="xerox-rag-"
+            prefix="xerox-rag"
         ) as temp_dir:
 
             pdf_path = (
